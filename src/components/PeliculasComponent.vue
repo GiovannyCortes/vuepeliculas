@@ -67,6 +67,7 @@
         watch : {
             "$route.params.option"(nextVal, oldVal) {
                 if (nextVal != oldVal) {
+                    this.seleccionado = -1;
                     if (this.$route.params.option != 3) {
                         this.loadPeliculas();
                         this.loadFiltro();
@@ -77,6 +78,7 @@
             },
             "$route.params.identificador"(nextVal, oldVal) {
                 if (nextVal != oldVal) {
+                    this.seleccionado = -1;
                     if (this.$route.params.option != 3) {
                         this.loadPeliculas();
                         this.loadFiltro();

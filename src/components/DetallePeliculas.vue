@@ -12,12 +12,17 @@
                 Eliminar
             </button> <br/>
             <div class="my-2">
-                <label class="text-dark">Género:</label> &nbsp;
-                <select v-model="generoSeleccionado" @change="cambiarGenero(pelicula.idPelicula)">
-                    <option v-for="gen in generos" :key="gen.idGenero" :value="gen.idGenero">
-                        {{gen.nombre}}    
-                    </option>
-                </select>
+                <form method="post" v-on:submit.prevent="cambiarGenero(pelicula.idPelicula)"> 
+                    <label class="text-dark">Género:</label> &nbsp;
+                    <select v-model="generoSeleccionado">
+                        <option v-for="gen in generos" :key="gen.idGenero" :value="gen.idGenero">
+                            {{gen.nombre}}    
+                        </option>
+                    </select> &nbsp;
+                    <button class="btn btn-success">
+                        Guardar Cambios
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -30,6 +35,7 @@
 <script>
     import ServicePeliculas from '../services/ServicePeliculas';
     import Swal from 'sweetalert2';
+
     const service = new ServicePeliculas();
     export default {
         name : "DetallePeliculas",
@@ -63,22 +69,31 @@
                 })
             },
             cambiarGenero(idPelicula) {
-                Swal.fire({
-                title: '¿Desea cambiar el genero de esta película?',
-                showDenyButton: false,
-                showCancelButton: true,
-                confirmButtonText: 'Sí',
-                denyButtonText: "",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        service.updatePelicula("/api/peliculas/updatepeliculagenero/", idPelicula, this.generoSeleccionado);
-                        // this.$router.go(); ## AQUÍ ESTÁ EL PROBLEMA
-                        Swal.fire('Película modificada', '', 'success')
-                    } else if (result.isDismissed) {
-                        this.generoSeleccionado = parseInt(this.idGen);
-                        Swal.fire('Modificación cancelada', '', 'info')
-                    }
-                })
+                if (this.generoSeleccionado != this.pelicula.idGenero) {
+                    Swal.fire({
+                    title: '¿Desea cambiar el genero de esta película?',
+                    showDenyButton: false,
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí',
+                    denyButtonText: "",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            service.updatePelicula("/api/peliculas/updatepeliculagenero/", idPelicula, this.generoSeleccionado).then(() => {
+                                this.$router.go();
+                            });
+                            Swal.fire('Película modificada', '', 'success')
+                        } else if (result.isDismissed) {
+                            this.generoSeleccionado = parseInt(this.idGen);
+                            Swal.fire('Modificación cancelada', '', 'info')
+                        }
+                    })
+                } else {
+                    Swal.fire(
+                        'Sin cambios',
+                        'No se ha producido ningún cambio en el género de la pelicula seleccionada',
+                        'info'
+                    )
+                }
             }
         },
         data() {
